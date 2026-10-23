@@ -27,10 +27,6 @@ public sealed class ShowController : IAsyncDisposable
         Settings = JsonStore.LoadSettings();
         Definitions.Clear();
         Definitions.AddRange(JsonStore.LoadFixtures());
-        if (Definitions.Count == 0)
-        {
-            Definitions.Add(CreateStarterGeneric());
-        }
 
         var map = Definitions.ToDictionary(d => d.Id);
         Patch.Clear();
@@ -261,17 +257,6 @@ public sealed class ShowController : IAsyncDisposable
         Engine.SetDeskSnapshot(merged);
         Changed?.Invoke();
     }
-
-    private static FixtureDefinition CreateStarterGeneric() => new()
-    {
-        Manufacturer = "Busk",
-        Model = "Generic Dimmer",
-        ModeName = "1ch",
-        Channels =
-        [
-            new FixtureChannel { Offset = 0, Name = "Dimmer", Role = ChannelRole.Intensity }
-        ]
-    };
 
     public async ValueTask DisposeAsync() => await Engine.DisposeAsync().ConfigureAwait(false);
 }

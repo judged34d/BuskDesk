@@ -24,12 +24,13 @@ Self-contained Build (Runtime eingebettet):
 
 ## Erster Test: U'King Spot + Air2DMX
 
-1. Spot: DMX-Adresse **001**, Modus **7CH**  
+1. Spot: DMX-Adresse **001**, gewünschter Kanalmodus  
 2. Laptop → WLAN `JMS_AIR2DMX_…`  
 3. Busk Desk → **Ausgang** → **Air2DMX** → Verbinden  
-4. **Sonde** oder **Pult**: Dimmer + Farbe hoch  
+4. **Sonde**: Kanäle ausmessen, Rollen setzen, als Fixture speichern  
+5. **Patch**: gespeichertes Profil auf die Startadresse legen, dann am **Pult** fahren  
 
-Profile liegen unter `fixtures/uking-par-rgbw-*.json`. Demo-Patch: Spot ab Adresse 1.
+Keine vorgefertigten Hersteller-Profile — genau der Fall, wenn online nichts Brauchbares existiert.
 
 ## Funktionen
 

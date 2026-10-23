@@ -172,8 +172,7 @@ public partial class MainViewModel : ViewModelBase
 
         Definitions.Clear();
         foreach (var d in _show.Definitions) Definitions.Add(d);
-        SelectedDefinition ??= Definitions.FirstOrDefault(d => d.Id.Contains("uking", StringComparison.OrdinalIgnoreCase))
-                               ?? Definitions.FirstOrDefault();
+        SelectedDefinition ??= Definitions.FirstOrDefault();
 
         for (var i = 0; i < Submasters.Count; i++)
         {

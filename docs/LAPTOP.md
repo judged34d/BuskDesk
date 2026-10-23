@@ -32,14 +32,14 @@ Oder self-contained (eine Ordner-Exe, .NET Runtime eingebettet):
 
 ## 3. Erster Test: U'King LED-Spot + Air2DMX
 
-1. Spot auf **DMX-Adresse 001**, Kanalmodus **7CH** (oder 8CH — dann anderes Profil patchen)  
+1. Spot auf **DMX-Adresse 001**, Kanalmodus am Gerät einstellen  
 2. Laptop mit Air2DMX-WLAN `JMS_AIR2DMX_…` verbinden  
-3. Busk Desk starten → **Ausgang** → **Air2DMX** → **Verbinden**  
-4. **Sonde**: Startadresse 1, Dimmer + Rot hochziehen  
-5. Wenn nichts passiert: Modus-Kanal (Ch7) auf **0–50** (DMX manuell), Sound-Modus aus  
+3. Busk Desk → **Ausgang** → **Air2DMX** → **Verbinden**  
+4. **Sonde**: Startadresse 1, Kanalzahl = Modus am Spot, Fader bewegen und Reaktion notieren  
+5. Rollen zuweisen → **Als Fixture speichern** → unter **Patch** einsetzen  
+6. Wenn Kanäle „tot“ wirken: oft steckt ein Modus-/Sound-Kanal hoch — in der Sonde auf niedrigen Wert (DMX manuell)  
 
-Mitgelieferte Profile: `fixtures/uking-par-rgbw-{4,7,8}ch.json`  
-Demo-Patch: Spot „U'King PAR 1“ ab Adresse 1 (7ch).
+Keine mitgelieferten Hersteller-Profile; die Sonde ist der Weg.
 
 ## 4. Weiterarbeiten
 
