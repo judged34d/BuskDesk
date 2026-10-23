@@ -46,6 +46,8 @@ Platzhalter: Assistent, Titel-Bibliothek. Siehe [docs/licon-move.md](docs/licon-
 
 ## Docs
 
+- [**Chat-Handoff (Zusammenfassung für Weiterarbeit)**](docs/CHAT-HANDOFF.md)
 - [Laptop-Setup & Test](docs/LAPTOP.md)
 - [Ausgänge / Air2DMX](docs/outputs.md)
 - [Architektur](docs/architecture.md)
+- [Move / Licon](docs/licon-move.md)
