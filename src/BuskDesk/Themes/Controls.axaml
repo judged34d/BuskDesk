@@ -1,0 +1,155 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource BuskBg}" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskText}" />
+        <Setter Property="FontFamily" Value="Inter, Segoe UI Variable, Segoe UI, sans-serif" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource BuskMuted}" />
+    </Style>
+
+    <Style Selector="TextBlock.brand">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LetterSpacing" Value="-0.5" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskText}" />
+    </Style>
+
+    <Style Selector="TextBlock.eyebrow">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskAccent}" />
+        <Setter Property="LetterSpacing" Value="1.6" />
+    </Style>
+
+    <Style Selector="TextBlock.section">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskMuted}" />
+        <Setter Property="LetterSpacing" Value="1.4" />
+    </Style>
+
+    <Style Selector="TextBlock.headline">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.nav">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskMuted}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource BuskSurfaceHover}" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskText}" />
+    </Style>
+
+    <Style Selector="Button.nav.active">
+        <Setter Property="Background" Value="{DynamicResource BuskNavActive}" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskText}" />
+    </Style>
+
+    <Style Selector="Button.nav.active /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource BuskNavActive}" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskText}" />
+    </Style>
+
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{DynamicResource BuskAccent}" />
+        <Setter Property="Foreground" Value="#14110C" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="16,11" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#FFC857" />
+    </Style>
+
+    <Style Selector="Button.ghost">
+        <Setter Property="Background" Value="{DynamicResource BuskSurfaceRaised}" />
+        <Setter Property="Foreground" Value="{DynamicResource BuskText}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BuskBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="CornerRadius" Value="10" />
+    </Style>
+
+    <Style Selector="Button.danger">
+        <Setter Property="Background" Value="{DynamicResource BuskDanger}" />
+        <Setter Property="Foreground" Value="#1A0C0B" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.live">
+        <Setter Property="Background" Value="{DynamicResource BuskLive}" />
+        <Setter Property="Foreground" Value="#06201C" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Border.panel">
+        <Setter Property="Background" Value="{DynamicResource BuskSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BuskBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="18" />
+    </Style>
+
+    <Style Selector="Border.chip">
+        <Setter Property="Background" Value="{DynamicResource BuskSurfaceRaised}" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="10,5" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="{DynamicResource BuskSurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BuskBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="Background" Value="{DynamicResource BuskSurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BuskBorder}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="MinHeight" Value="36" />
+    </Style>
+
+    <Style Selector="NumericUpDown">
+        <Setter Property="Background" Value="{DynamicResource BuskSurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BuskBorder}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="MinHeight" Value="36" />
+    </Style>
+
+    <Style Selector="Slider.fader">
+        <Setter Property="Orientation" Value="Vertical" />
+        <Setter Property="Minimum" Value="0" />
+        <Setter Property="Maximum" Value="255" />
+        <Setter Property="Height" Value="168" />
+        <Setter Property="Width" Value="30" />
+    </Style>
+
+    <Style Selector="Slider.master">
+        <Setter Property="Minimum" Value="0" />
+        <Setter Property="Maximum" Value="255" />
+    </Style>
+</Styles>

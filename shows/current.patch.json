@@ -1,0 +1,9 @@
+[
+  {
+    "instanceId": "demo-uking-par-001",
+    "definitionId": "uking-par-rgbw-7ch",
+    "name": "U'King PAR 1",
+    "startAddress": 1,
+    "group": "Spots"
+  }
+]

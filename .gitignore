@@ -1,0 +1,32 @@
+## Build
+bin/
+obj/
+publish/
+artifacts/
+*.user
+*.suo
+.vs/
+.idea/
+*.DotSettings.user
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Local secrets / machine-specific
+**/AppData/
+*.local.json
+.env
+.spotify-token*
+buskdesk.settings.json
+
+## Large model binaries (ship via installer later)
+models/*.onnx
+models/*.pb
+models/*.bin
+!models/.gitkeep
+
+## Keep library empty in git; shows/fixtures are tracked
+library/**
+!library/.gitkeep

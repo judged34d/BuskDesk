@@ -1,0 +1,30 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="BuskDesk.App"
+             xmlns:local="using:BuskDesk"
+             RequestedThemeVariant="Dark">
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <SolidColorBrush x:Key="BuskBg" Color="#07090C" />
+        <SolidColorBrush x:Key="BuskSurface" Color="#10151B" />
+        <SolidColorBrush x:Key="BuskSurfaceRaised" Color="#171E26" />
+        <SolidColorBrush x:Key="BuskSurfaceHover" Color="#1F2832" />
+        <SolidColorBrush x:Key="BuskBorder" Color="#2A3540" />
+        <SolidColorBrush x:Key="BuskText" Color="#F2F5F7" />
+        <SolidColorBrush x:Key="BuskMuted" Color="#8B9AAB" />
+        <SolidColorBrush x:Key="BuskAccent" Color="#F0B429" />
+        <SolidColorBrush x:Key="BuskAccentSoft" Color="#3D3012" />
+        <SolidColorBrush x:Key="BuskLive" Color="#2DD4BF" />
+        <SolidColorBrush x:Key="BuskDanger" Color="#F07167" />
+        <SolidColorBrush x:Key="BuskNavActive" Color="#1A2430" />
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://BuskDesk/Themes/Controls.axaml" />
+    </Application.Styles>
+</Application>
