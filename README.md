@@ -5,9 +5,9 @@ Modernes Windows-Lichtpult für kleine Shows: Sonde, Patch, Zwei-Preset-Pult, Sz
 **Status:** v0.3 — Fokuspunkte (Pfeiltasten) + Bewegung A↔B  
 **Stack:** .NET 8 · Avalonia 11
 
-> **Arbeitskopie:** Ab sofort nur noch auf dem **Laptop** entwickeln (siehe [docs/LAPTOP.md](docs/LAPTOP.md)).
+> **Arbeitskopie:** Nur noch lokal auf **Windows** im Ordner `BuskDesk` (siehe [docs/LAPTOP.md](docs/LAPTOP.md)). Cursor Cloud ist nicht die Arbeitsmaschine.
 
-## Schnellstart (Laptop)
+## Schnellstart (Windows)
 
 ```powershell
 git clone https://github.com/judged34d/BuskDesk.git
@@ -20,6 +20,12 @@ Self-contained Build (Runtime eingebettet):
 ```powershell
 .\scripts\publish-standalone.ps1
 .\publish\win-x64\BuskDesk.exe
+```
+
+Desktop-Verknüpfung:
+
+```powershell
+.\scripts\create-desktop-shortcut.ps1
 ```
 
 ## Erster Test: U'King Spot + Air2DMX

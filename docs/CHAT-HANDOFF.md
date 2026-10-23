@@ -2,7 +2,7 @@
 
 Stand: 23. Oktober 2026 · Repo: https://github.com/judged34d/BuskDesk · Version im Code: **v0.3 Move**
 
-Dieser Text fasst die Planungs- und Entwicklungsgespräche zusammen, damit die Arbeit auf dem **Laptop** weitergeht. Am bisherigen PC soll **nicht** parallel weiterentwickelt werden (Versionskonflikte vermeiden).
+Dieser Text fasst die Planungs- und Entwicklungsgespräche zusammen, damit die Arbeit auf dem **Windows-Laptop/PC** weitergeht (Ordner `BuskDesk` = dieses Repo). **Nicht** in Cursor Cloud weiterentwickeln; Cloud-VMs sind keine Arbeitsmaschine. Am bisherigen zweiten PC soll **nicht** parallel weiterentwickelt werden (Versionskonflikte vermeiden).
 
 ---
 
@@ -75,7 +75,7 @@ Szene / Submaster / Pult (HTP) → **Effect** (Move-Patterns, LTP) → Sonde-Ove
 - Sonde, Fixture-JSON, Patch, Pult A/B, Szenen, Submaster
 - **Move**: Fokuspunkte, A↔B-Patterns, Pfeiltasten (Shift = fein)
 - Persistenz: `shows/*.json`, `fixtures/*.json`
-- Skripte: `scripts/run.ps1`, `scripts/publish-standalone.ps1`
+- Skripte: `scripts/run.ps1`, `scripts/publish-standalone.ps1`, `scripts/create-desktop-shortcut.ps1` (Windows-Desktop `.lnk`)
 
 ### Docs
 
@@ -132,21 +132,23 @@ Priorität grob:
 
 ---
 
-## 8. Für den Agenten auf dem Laptop
+## 8. Für den Agenten auf dem Windows-Laptop
 
 ```text
 Projekt: Busk Desk (https://github.com/judged34d/BuskDesk)
+Arbeitsort: lokaler Ordner BuskDesk auf Windows — nicht Cursor Cloud
 Lies: README.md, docs/CHAT-HANDOFF.md, docs/LAPTOP.md, docs/outputs.md, docs/licon-move.md
 Arbeitsregel: schlankes Small-Show-Tool, keine Profi-Ballast-Features
 Nächster sinnvoller Schritt: nach Nutzerwunsch — oft Hardware-Test oder Sonde-Bereiche-UI
 ```
 
-Clone:
+Clone / Start / Desktop-Verknüpfung:
 
 ```powershell
 git clone https://github.com/judged34d/BuskDesk.git
 cd BuskDesk
 .\scripts\run.ps1
+.\scripts\create-desktop-shortcut.ps1
 ```
 
 ---
