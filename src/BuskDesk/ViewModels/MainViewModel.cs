@@ -68,7 +68,7 @@ public partial class MainViewModel : ViewModelBase
     }
 
     public string AppName => "Busk Desk";
-    public string VersionLabel => "v0.2 · Functional";
+    public string VersionLabel => "v0.3 · Move";
 
     public ObservableCollection<FaderChannelViewModel> PresetA { get; } = [];
     public ObservableCollection<FaderChannelViewModel> PresetB { get; } = [];
@@ -77,6 +77,8 @@ public partial class MainViewModel : ViewModelBase
     public ObservableCollection<SceneLook> Scenes { get; } = [];
     public ObservableCollection<PatchedFixture> Patch { get; } = [];
     public ObservableCollection<FixtureDefinition> Definitions { get; } = [];
+    public ObservableCollection<FocusPoint> FocusPoints { get; } = [];
+    public ObservableCollection<MovePattern> Patterns { get; } = [];
     public ObservableCollection<OutputOption> OutputOptions { get; }
     public IReadOnlyList<ChannelRole> AvailableRoles { get; }
     public ObservableCollection<string> SerialPorts { get; } = [];
@@ -104,9 +106,24 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private ChannelRole _selectedProbeRole = ChannelRole.Raw;
     [ObservableProperty] private FaderChannelViewModel? _selectedProbeChannel;
     [ObservableProperty] private string _toast = "";
+    [ObservableProperty] private PatchedFixture? _selectedMoveFixture;
+    [ObservableProperty] private string _newFocusName = "Rednerpult";
+    [ObservableProperty] private string _newPatternName = "Hin und her";
+    [ObservableProperty] private double _patternSeconds = 3;
+    [ObservableProperty] private bool _patternIncludeIntensity = true;
+    [ObservableProperty] private bool _patternIncludeColor = true;
+    [ObservableProperty] private bool _patternIncludeGobo;
+    [ObservableProperty] private bool _patternIncludeStrobe;
+    [ObservableProperty] private string _markALabel = "A — nicht gesetzt";
+    [ObservableProperty] private string _markBLabel = "B — nicht gesetzt";
+    [ObservableProperty] private string _moveHint = "Fixture wählen · Pfeile = Pan/Tilt · Shift = fein";
+
+    private (byte pan, byte tilt, byte? panFine, byte? tiltFine)? _markA;
+    private (byte pan, byte tilt, byte? panFine, byte? tiltFine)? _markB;
 
     public bool IsDesk => CurrentSection == AppSection.Desk;
     public bool IsScenes => CurrentSection == AppSection.Scenes;
+    public bool IsMove => CurrentSection == AppSection.Move;
     public bool IsPatch => CurrentSection == AppSection.Patch;
     public bool IsProbe => CurrentSection == AppSection.Probe;
     public bool IsOutput => CurrentSection == AppSection.Output;
@@ -117,11 +134,16 @@ public partial class MainViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsDesk));
         OnPropertyChanged(nameof(IsScenes));
+        OnPropertyChanged(nameof(IsMove));
         OnPropertyChanged(nameof(IsPatch));
         OnPropertyChanged(nameof(IsProbe));
         OnPropertyChanged(nameof(IsOutput));
         OnPropertyChanged(nameof(IsAssistant));
         OnPropertyChanged(nameof(IsTracks));
+        if (value == AppSection.Move)
+        {
+            MoveHint = "Pfeiltasten: Pan/Tilt · Shift+Pfeil = fein · Fokus speichern oder A/B markieren";
+        }
     }
 
     partial void OnGrandMasterChanged(double value) =>
@@ -170,9 +192,16 @@ public partial class MainViewModel : ViewModelBase
         Patch.Clear();
         foreach (var p in _show.Patch) Patch.Add(p);
 
+        FocusPoints.Clear();
+        foreach (var f in _show.FocusPoints) FocusPoints.Add(f);
+
+        Patterns.Clear();
+        foreach (var p in _show.Patterns) Patterns.Add(p);
+
         Definitions.Clear();
         foreach (var d in _show.Definitions) Definitions.Add(d);
         SelectedDefinition ??= Definitions.FirstOrDefault();
+        SelectedMoveFixture ??= Patch.FirstOrDefault(p => FixtureChannelMap.HasPanTilt(p));
 
         for (var i = 0; i < Submasters.Count; i++)
         {
@@ -271,11 +300,150 @@ public partial class MainViewModel : ViewModelBase
 
     [RelayCommand] private void GoDesk() => CurrentSection = AppSection.Desk;
     [RelayCommand] private void GoScenes() => CurrentSection = AppSection.Scenes;
+    [RelayCommand] private void GoMove() => CurrentSection = AppSection.Move;
     [RelayCommand] private void GoPatch() => CurrentSection = AppSection.Patch;
     [RelayCommand] private void GoProbe() => CurrentSection = AppSection.Probe;
     [RelayCommand] private void GoOutput() => CurrentSection = AppSection.Output;
     [RelayCommand] private void GoAssistant() => CurrentSection = AppSection.Assistant;
     [RelayCommand] private void GoTracks() => CurrentSection = AppSection.Tracks;
+
+    public void HandleMoveKeys(Avalonia.Input.Key key, bool shift)
+    {
+        if (CurrentSection != AppSection.Move || SelectedMoveFixture is null) return;
+        var step = shift ? 1 : 4;
+        var pan = 0;
+        var tilt = 0;
+        switch (key)
+        {
+            case Avalonia.Input.Key.Left: pan = -step; break;
+            case Avalonia.Input.Key.Right: pan = step; break;
+            case Avalonia.Input.Key.Up: tilt = step; break;
+            case Avalonia.Input.Key.Down: tilt = -step; break;
+            default: return;
+        }
+
+        _show.NudgePanTilt(SelectedMoveFixture, pan, tilt);
+        var panV = FixtureChannelMap.ReadRole(SelectedMoveFixture, ChannelRole.Pan, _show.Engine.GetOutputChannel);
+        var tiltV = FixtureChannelMap.ReadRole(SelectedMoveFixture, ChannelRole.Tilt, _show.Engine.GetOutputChannel);
+        MoveHint = $"{SelectedMoveFixture.Name} · Pan {panV} · Tilt {tiltV}";
+    }
+
+    [RelayCommand]
+    private void SaveFocus()
+    {
+        if (SelectedMoveFixture is null)
+        {
+            Toast = "Zuerst Fixture mit Pan/Tilt wählen";
+            return;
+        }
+
+        if (!FixtureChannelMap.HasPanTilt(SelectedMoveFixture))
+        {
+            Toast = "Fixture braucht Pan/Tilt-Rollen (Sonde)";
+            return;
+        }
+
+        var name = string.IsNullOrWhiteSpace(NewFocusName) ? $"Pos {FocusPoints.Count + 1}" : NewFocusName;
+        _show.CaptureFocusPoint(SelectedMoveFixture, name);
+        Toast = $"Fokus „{name}“ gespeichert";
+        RefreshFromController();
+    }
+
+    [RelayCommand]
+    private void RecallFocus(FocusPoint? point)
+    {
+        if (point is null) return;
+        _show.RecallFocusPoint(point);
+        Toast = $"Fokus · {point.Name}";
+    }
+
+    [RelayCommand]
+    private void DeleteFocus(FocusPoint? point)
+    {
+        if (point is null) return;
+        _show.DeleteFocusPoint(point);
+        Toast = "Fokus gelöscht";
+        RefreshFromController();
+    }
+
+    [RelayCommand]
+    private void MarkPatternA()
+    {
+        if (SelectedMoveFixture is null) return;
+        _markA = CaptureMark(SelectedMoveFixture);
+        MarkALabel = $"A · Pan {_markA.Value.pan} / Tilt {_markA.Value.tilt}";
+        Toast = "Startpunkt A gesetzt";
+    }
+
+    [RelayCommand]
+    private void MarkPatternB()
+    {
+        if (SelectedMoveFixture is null) return;
+        _markB = CaptureMark(SelectedMoveFixture);
+        MarkBLabel = $"B · Pan {_markB.Value.pan} / Tilt {_markB.Value.tilt}";
+        Toast = "Endpunkt B gesetzt";
+    }
+
+    [RelayCommand]
+    private void SavePattern()
+    {
+        if (SelectedMoveFixture is null || _markA is null || _markB is null)
+        {
+            Toast = "Fixture + A + B nötig";
+            return;
+        }
+
+        var name = string.IsNullOrWhiteSpace(NewPatternName) ? $"Pattern {Patterns.Count + 1}" : NewPatternName;
+        _show.CapturePatternFromMarks(
+            SelectedMoveFixture,
+            name,
+            _markA.Value,
+            _markB.Value,
+            PatternSeconds,
+            PatternIncludeIntensity,
+            PatternIncludeColor,
+            PatternIncludeGobo,
+            PatternIncludeStrobe);
+        Toast = $"Pattern „{name}“ gespeichert";
+        RefreshFromController();
+    }
+
+    [RelayCommand]
+    private void TogglePattern(MovePattern? pattern)
+    {
+        if (pattern is null) return;
+        var playing = _show.ToggleMovePattern(pattern);
+        Toast = playing ? $"Play · {pattern.Name}" : $"Stop · {pattern.Name}";
+        RefreshFromController();
+    }
+
+    [RelayCommand]
+    private void DeletePattern(MovePattern? pattern)
+    {
+        if (pattern is null) return;
+        _show.DeleteMovePattern(pattern);
+        Toast = "Pattern gelöscht";
+        RefreshFromController();
+    }
+
+    [RelayCommand]
+    private void StopPatterns()
+    {
+        _show.PatternPlayer.Stop();
+        Toast = "Bewegung gestoppt";
+    }
+
+    private (byte pan, byte tilt, byte? panFine, byte? tiltFine) CaptureMark(PatchedFixture fixture) =>
+    (
+        FixtureChannelMap.ReadRole(fixture, ChannelRole.Pan, _show.Engine.GetOutputChannel),
+        FixtureChannelMap.ReadRole(fixture, ChannelRole.Tilt, _show.Engine.GetOutputChannel),
+        FixtureChannelMap.AbsoluteAddress(fixture, ChannelRole.PanFine) is not null
+            ? FixtureChannelMap.ReadRole(fixture, ChannelRole.PanFine, _show.Engine.GetOutputChannel)
+            : null,
+        FixtureChannelMap.AbsoluteAddress(fixture, ChannelRole.TiltFine) is not null
+            ? FixtureChannelMap.ReadRole(fixture, ChannelRole.TiltFine, _show.Engine.GetOutputChannel)
+            : null
+    );
 
     [RelayCommand]
     private void ToggleBlackout() => Blackout = !Blackout;

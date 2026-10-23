@@ -12,6 +12,8 @@ public sealed class ShowController : IAsyncDisposable
     public List<FixtureDefinition> Definitions { get; } = [];
     public List<PatchedFixture> Patch { get; } = [];
     public List<SceneLook> Scenes { get; } = [];
+    public List<FocusPoint> FocusPoints { get; } = [];
+    public List<MovePattern> Patterns { get; } = [];
     public SubmasterSlot[] Submasters { get; } = Enumerable.Range(1, 12)
         .Select(i => new SubmasterSlot { Name = $"SM {i}" })
         .ToArray();
@@ -19,8 +21,14 @@ public sealed class ShowController : IAsyncDisposable
     public byte[] PresetA { get; } = new byte[DmxUniverse.ChannelCount];
     public byte[] PresetB { get; } = new byte[DmxUniverse.ChannelCount];
     public double Crossfade { get; private set; }
+    public MovePatternPlayer PatternPlayer { get; }
 
     public event Action? Changed;
+
+    public ShowController()
+    {
+        PatternPlayer = new MovePatternPlayer(Engine);
+    }
 
     public async Task InitializeAsync()
     {
@@ -33,6 +41,10 @@ public sealed class ShowController : IAsyncDisposable
         Patch.AddRange(JsonStore.LoadPatch(map));
         Scenes.Clear();
         Scenes.AddRange(JsonStore.LoadScenes());
+        FocusPoints.Clear();
+        FocusPoints.AddRange(JsonStore.LoadFocusPoints());
+        Patterns.Clear();
+        Patterns.AddRange(JsonStore.LoadPatterns());
 
         ApplyIntensityMask();
         await ApplyOutputAsync(Settings.SelectedOutputId).ConfigureAwait(false);
@@ -242,6 +254,147 @@ public sealed class ShowController : IAsyncDisposable
         Engine.SetIntensityMask(a => intensity[a - 1]);
     }
 
+    public void NudgePanTilt(PatchedFixture fixture, int panDelta, int tiltDelta)
+    {
+        if (!FixtureChannelMap.HasPanTilt(fixture)) return;
+        PatternPlayer.Stop();
+
+        void Nudge(ChannelRole role, int delta)
+        {
+            var addr = FixtureChannelMap.AbsoluteAddress(fixture, role);
+            if (addr is not int a) return;
+            var next = Math.Clamp(Engine.GetOutputChannel(a) + delta, 0, 255);
+            // Live move goes through desk so it stays when pattern stops
+            PresetA[a - 1] = (byte)next;
+        }
+
+        if (panDelta != 0) Nudge(ChannelRole.Pan, panDelta);
+        if (tiltDelta != 0) Nudge(ChannelRole.Tilt, tiltDelta);
+        RebuildDeskMerge();
+    }
+
+    public FocusPoint CaptureFocusPoint(PatchedFixture fixture, string name)
+    {
+        var point = new FocusPoint
+        {
+            Name = name,
+            FixtureInstanceId = fixture.InstanceId,
+            Pan = FixtureChannelMap.ReadRole(fixture, ChannelRole.Pan, Engine.GetOutputChannel),
+            Tilt = FixtureChannelMap.ReadRole(fixture, ChannelRole.Tilt, Engine.GetOutputChannel),
+            PanFine = FixtureChannelMap.AbsoluteAddress(fixture, ChannelRole.PanFine) is not null
+                ? FixtureChannelMap.ReadRole(fixture, ChannelRole.PanFine, Engine.GetOutputChannel)
+                : null,
+            TiltFine = FixtureChannelMap.AbsoluteAddress(fixture, ChannelRole.TiltFine) is not null
+                ? FixtureChannelMap.ReadRole(fixture, ChannelRole.TiltFine, Engine.GetOutputChannel)
+                : null
+        };
+        FocusPoints.Add(point);
+        JsonStore.SaveFocusPoints(FocusPoints);
+        Changed?.Invoke();
+        return point;
+    }
+
+    public void RecallFocusPoint(FocusPoint point)
+    {
+        var fixture = Patch.FirstOrDefault(p => p.InstanceId == point.FixtureInstanceId);
+        if (fixture is null) return;
+
+        void Apply(ChannelRole role, byte value)
+        {
+            var addr = FixtureChannelMap.AbsoluteAddress(fixture, role);
+            if (addr is not int a) return;
+            PresetA[a - 1] = value;
+        }
+
+        Apply(ChannelRole.Pan, point.Pan);
+        Apply(ChannelRole.Tilt, point.Tilt);
+        if (point.PanFine is byte pf) Apply(ChannelRole.PanFine, pf);
+        if (point.TiltFine is byte tf) Apply(ChannelRole.TiltFine, tf);
+        RebuildDeskMerge();
+    }
+
+    public void DeleteFocusPoint(FocusPoint point)
+    {
+        FocusPoints.Remove(point);
+        JsonStore.SaveFocusPoints(FocusPoints);
+        Changed?.Invoke();
+    }
+
+    public MovePattern SaveMovePattern(MovePattern pattern)
+    {
+        Patterns.Add(pattern);
+        JsonStore.SavePatterns(Patterns);
+        Changed?.Invoke();
+        return pattern;
+    }
+
+    public void DeleteMovePattern(MovePattern pattern)
+    {
+        if (PatternPlayer.ActivePatternId == pattern.Id)
+        {
+            PatternPlayer.Stop();
+        }
+
+        Patterns.Remove(pattern);
+        JsonStore.SavePatterns(Patterns);
+        Changed?.Invoke();
+    }
+
+    public bool ToggleMovePattern(MovePattern pattern)
+    {
+        if (PatternPlayer.ActivePatternId == pattern.Id && PatternPlayer.IsPlaying)
+        {
+            PatternPlayer.Stop();
+            Changed?.Invoke();
+            return false;
+        }
+
+        var fixture = Patch.FirstOrDefault(p => p.InstanceId == pattern.FixtureInstanceId);
+        if (fixture is null) return false;
+        PatternPlayer.Start(pattern, fixture);
+        Changed?.Invoke();
+        return true;
+    }
+
+    public MovePattern CapturePatternFromMarks(
+        PatchedFixture fixture,
+        string name,
+        (byte pan, byte tilt, byte? panFine, byte? tiltFine) a,
+        (byte pan, byte tilt, byte? panFine, byte? tiltFine) b,
+        double oneWaySeconds,
+        bool includeIntensity,
+        bool includeColor,
+        bool includeGobo,
+        bool includeStrobe)
+    {
+        var pattern = new MovePattern
+        {
+            Name = name,
+            FixtureInstanceId = fixture.InstanceId,
+            PanA = a.pan,
+            TiltA = a.tilt,
+            PanFineA = a.panFine,
+            TiltFineA = a.tiltFine,
+            PanB = b.pan,
+            TiltB = b.tilt,
+            PanFineB = b.panFine,
+            TiltFineB = b.tiltFine,
+            OneWaySeconds = oneWaySeconds,
+            IncludeIntensity = includeIntensity,
+            IncludeColor = includeColor,
+            IncludeGobo = includeGobo,
+            IncludeStrobe = includeStrobe,
+            Intensity = FixtureChannelMap.ReadRole(fixture, ChannelRole.Intensity, Engine.GetOutputChannel, 255),
+            Red = FixtureChannelMap.ReadRole(fixture, ChannelRole.ColorRed, Engine.GetOutputChannel),
+            Green = FixtureChannelMap.ReadRole(fixture, ChannelRole.ColorGreen, Engine.GetOutputChannel),
+            Blue = FixtureChannelMap.ReadRole(fixture, ChannelRole.ColorBlue, Engine.GetOutputChannel),
+            White = FixtureChannelMap.ReadRole(fixture, ChannelRole.ColorWhite, Engine.GetOutputChannel),
+            Gobo = FixtureChannelMap.ReadRole(fixture, ChannelRole.Gobo, Engine.GetOutputChannel),
+            Strobe = FixtureChannelMap.ReadRole(fixture, ChannelRole.Strobe, Engine.GetOutputChannel)
+        };
+        return SaveMovePattern(pattern);
+    }
+
     private void RebuildDeskMerge()
     {
         var merged = new byte[DmxUniverse.ChannelCount];
@@ -258,5 +411,9 @@ public sealed class ShowController : IAsyncDisposable
         Changed?.Invoke();
     }
 
-    public async ValueTask DisposeAsync() => await Engine.DisposeAsync().ConfigureAwait(false);
+    public async ValueTask DisposeAsync()
+    {
+        PatternPlayer.Stop();
+        await Engine.DisposeAsync().ConfigureAwait(false);
+    }
 }

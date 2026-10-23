@@ -132,6 +132,42 @@ public static class JsonStore
         }
     }
 
+    public static void SaveFocusPoints(IEnumerable<FocusPoint> points) =>
+        File.WriteAllText(AppPaths.FocusFile, JsonSerializer.Serialize(points.ToList(), Options));
+
+    public static List<FocusPoint> LoadFocusPoints()
+    {
+        if (!File.Exists(AppPaths.FocusFile)) return [];
+        try
+        {
+            return JsonSerializer.Deserialize<List<FocusPoint>>(
+                       File.ReadAllText(AppPaths.FocusFile), Options)
+                   ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    public static void SavePatterns(IEnumerable<MovePattern> patterns) =>
+        File.WriteAllText(AppPaths.PatternsFile, JsonSerializer.Serialize(patterns.ToList(), Options));
+
+    public static List<MovePattern> LoadPatterns()
+    {
+        if (!File.Exists(AppPaths.PatternsFile)) return [];
+        try
+        {
+            return JsonSerializer.Deserialize<List<MovePattern>>(
+                       File.ReadAllText(AppPaths.PatternsFile), Options)
+                   ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
     private static string Sanitize(string name)
     {
         foreach (var c in Path.GetInvalidFileNameChars())

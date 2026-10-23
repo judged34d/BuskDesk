@@ -63,6 +63,7 @@
                 <StackPanel Spacing="3">
                     <Button Content="Pult" Classes="nav" Classes.active="{Binding IsDesk}" Command="{Binding GoDeskCommand}" />
                     <Button Content="Szenen" Classes="nav" Classes.active="{Binding IsScenes}" Command="{Binding GoScenesCommand}" />
+                    <Button Content="Move" Classes="nav" Classes.active="{Binding IsMove}" Command="{Binding GoMoveCommand}" />
                     <Button Content="Patch" Classes="nav" Classes.active="{Binding IsPatch}" Command="{Binding GoPatchCommand}" />
                     <Button Content="Sonde" Classes="nav" Classes.active="{Binding IsProbe}" Command="{Binding GoProbeCommand}" />
                     <Button Content="Ausgang" Classes="nav" Classes.active="{Binding IsOutput}" Command="{Binding GoOutputCommand}" />
@@ -200,6 +201,124 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                </StackPanel>
+
+                <!-- MOVE / FOCUS / PATTERNS -->
+                <StackPanel IsVisible="{Binding IsMove}" Spacing="18" MaxWidth="980" HorizontalAlignment="Left">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="FOCUS &amp; MOVE" Classes="eyebrow" />
+                        <TextBlock Text="Positionen &amp; Bewegung" Classes="headline" />
+                        <TextBlock Text="{Binding MoveHint}" Classes="muted" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="FIXTURE" Classes="section" />
+                            <ComboBox ItemsSource="{Binding Patch}"
+                                      SelectedItem="{Binding SelectedMoveFixture}"
+                                      MinHeight="40">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="model:PatchedFixture">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Classes="muted" TextWrapping="Wrap"
+                                       Text="← → ↑ ↓ Pan/Tilt · Shift+Pfeil = fein. Fixture braucht in der Sonde die Rollen Pan und Tilt." />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,16,*">
+                        <Border Classes="panel">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="FOKUSPUNKTE" Classes="section" />
+                                <TextBlock Classes="muted" TextWrapping="Wrap"
+                                           Text="Wie am Abend vor dem Gig: Ziel anfahren, speichern (Rednerpult, Seitenwand …)." />
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBox Width="200" Text="{Binding NewFocusName}" Watermark="Name" />
+                                    <Button Content="Position speichern" Classes="primary" Command="{Binding SaveFocusCommand}" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding FocusPoints}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="model:FocusPoint">
+                                            <Border Background="{DynamicResource BuskSurfaceRaised}"
+                                                    CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                        <TextBlock Classes="muted" FontSize="12"
+                                                                   Text="{Binding Pan, StringFormat=Pan {0}}" />
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1" Content="GO" Classes="live" Margin="0,0,8,0"
+                                                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).RecallFocusCommand}"
+                                                            CommandParameter="{Binding}" />
+                                                    <Button Grid.Column="2" Content="×" Classes="ghost"
+                                                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).DeleteFocusCommand}"
+                                                            CommandParameter="{Binding}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2" Classes="panel">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="BEWEGUNG A ↔ B" Classes="section" />
+                                <TextBlock Classes="muted" TextWrapping="Wrap"
+                                           Text="Wie früher am Pult: Spot auf A (Start), Spot auf B (Ende), speichern. Taste = hin und her mit Look." />
+                                <TextBlock Text="{Binding MarkALabel}" />
+                                <TextBlock Text="{Binding MarkBLabel}" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Content="Mark A (Start)" Classes="ghost" Command="{Binding MarkPatternACommand}" />
+                                    <Button Content="Mark B (Ende)" Classes="ghost" Command="{Binding MarkPatternBCommand}" />
+                                </StackPanel>
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                                    <TextBox Grid.ColumnSpan="2" Text="{Binding NewPatternName}" Watermark="Pattern-Name" Margin="0,0,0,8" />
+                                    <StackPanel Grid.Row="1" Margin="0,0,8,8">
+                                        <TextBlock Text="Sekunden A→B" Classes="muted" FontSize="11" />
+                                        <NumericUpDown Minimum="0.5" Maximum="60" Increment="0.5"
+                                                       Value="{Binding PatternSeconds}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="0,0,0,8">
+                                        <CheckBox Content="Dimmer mit speichern" IsChecked="{Binding PatternIncludeIntensity}" />
+                                        <CheckBox Content="Farbe mit speichern" IsChecked="{Binding PatternIncludeColor}" />
+                                        <CheckBox Content="Gobo mit speichern" IsChecked="{Binding PatternIncludeGobo}" />
+                                        <CheckBox Content="Strobe mit speichern" IsChecked="{Binding PatternIncludeStrobe}" />
+                                    </StackPanel>
+                                    <Button Grid.Row="2" Grid.ColumnSpan="2" Content="Pattern speichern"
+                                            Classes="primary" HorizontalAlignment="Left"
+                                            Command="{Binding SavePatternCommand}" Margin="0,0,0,8" />
+                                    <Button Grid.Row="3" Grid.ColumnSpan="2" Content="Alle Bewegungen stoppen"
+                                            Classes="danger" HorizontalAlignment="Left"
+                                            Command="{Binding StopPatternsCommand}" />
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Patterns}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="model:MovePattern">
+                                            <Border Background="{DynamicResource BuskSurfaceRaised}"
+                                                    CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                        <TextBlock Classes="muted" FontSize="12"
+                                                                   Text="{Binding OneWaySeconds, StringFormat={}{0:0.#}s A→B}" />
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1" Content="Play/Stop" Classes="live" Margin="0,0,8,0"
+                                                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).TogglePatternCommand}"
+                                                            CommandParameter="{Binding}" />
+                                                    <Button Grid.Column="2" Content="×" Classes="ghost"
+                                                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).DeletePatternCommand}"
+                                                            CommandParameter="{Binding}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </StackPanel>
 
                 <!-- PATCH -->

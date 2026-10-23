@@ -2,7 +2,7 @@
 
 Modernes Windows-Lichtpult für kleine Shows: Sonde, Patch, Zwei-Preset-Pult, Szenen, Air2DMX / Art-Net / USB-DMX-Pro.
 
-**Status:** v0.2 — bereit für ersten Hardware-Test (U'King LED-Spot)  
+**Status:** v0.3 — Fokuspunkte (Pfeiltasten) + Bewegung A↔B  
 **Stack:** .NET 8 · Avalonia 11
 
 > **Arbeitskopie:** Ab sofort nur noch auf dem **Laptop** entwickeln (siehe [docs/LAPTOP.md](docs/LAPTOP.md)).
@@ -40,8 +40,9 @@ Keine vorgefertigten Hersteller-Profile — genau der Fall, wenn online nichts B
 | Engine | 40 Hz, Merge, Grand Master, Blackout |
 | Sonde | Live-Kanäle → Fixture JSON |
 | Patch / Pult / Szenen | Speichern, Crossfade, Submaster, GO |
+| **Move** | Pfeiltasten Pan/Tilt, Fokuspunkte, Pattern A↔B inkl. optional Farbe/Gobo/Dimmer/Strobe |
 
-Platzhalter: Assistent, Titel-Bibliothek.
+Platzhalter: Assistent, Titel-Bibliothek. Siehe [docs/licon-move.md](docs/licon-move.md).
 
 ## Docs
 

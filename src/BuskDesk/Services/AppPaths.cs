@@ -34,6 +34,8 @@ public static class AppPaths
     public static string SettingsFile => Path.Combine(Root, "buskdesk.settings.json");
     public static string PatchFile => Path.Combine(ShowsDir, "current.patch.json");
     public static string ScenesFile => Path.Combine(ShowsDir, "current.scenes.json");
+    public static string FocusFile => Path.Combine(ShowsDir, "current.focus.json");
+    public static string PatternsFile => Path.Combine(ShowsDir, "current.patterns.json");
 
     private static string Ensure(string path)
     {

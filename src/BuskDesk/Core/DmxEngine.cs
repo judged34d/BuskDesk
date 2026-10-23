@@ -15,6 +15,8 @@ public sealed class DmxEngine : IAsyncDisposable
     private readonly byte[] _desk = new byte[DmxUniverse.ChannelCount];
     private readonly byte[] _scene = new byte[DmxUniverse.ChannelCount];
     private readonly byte[] _submaster = new byte[DmxUniverse.ChannelCount];
+    private readonly bool[] _effectOverride = new bool[DmxUniverse.ChannelCount];
+    private readonly byte[] _effect = new byte[DmxUniverse.ChannelCount];
     private readonly bool[] _probeOverride = new bool[DmxUniverse.ChannelCount];
     private readonly byte[] _probe = new byte[DmxUniverse.ChannelCount];
     private readonly bool[] _intensityMask = new bool[DmxUniverse.ChannelCount];
@@ -119,6 +121,30 @@ public sealed class DmxEngine : IAsyncDisposable
     public void ClearSubmaster()
     {
         lock (_gate) Array.Clear(_submaster);
+        Rebuild();
+    }
+
+    public void SetEffectOverride(int address1Based, byte value, bool enabled = true)
+    {
+        Validate(address1Based);
+        lock (_gate)
+        {
+            var i = address1Based - 1;
+            _effectOverride[i] = enabled;
+            _effect[i] = value;
+        }
+
+        Rebuild();
+    }
+
+    public void ClearEffectOverrides()
+    {
+        lock (_gate)
+        {
+            Array.Clear(_effectOverride);
+            Array.Clear(_effect);
+        }
+
         Rebuild();
     }
 
@@ -293,6 +319,12 @@ public sealed class DmxEngine : IAsyncDisposable
             {
                 // HTP for intensity-ish layers: scene / submaster / desk
                 var value = Max3(_scene[i], _submaster[i], _desk[i]);
+
+                // Effect layer (move patterns) — LTP on touched channels
+                if (_effectOverride[i])
+                {
+                    value = _effect[i];
+                }
 
                 if (_probeOverride[i])
                 {
