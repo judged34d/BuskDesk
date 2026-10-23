@@ -10,7 +10,7 @@ Modernes Windows-Lichtpult für kleine Shows: Sonde, Patch, Zwei-Preset-Pult, Sz
 ## Schnellstart (Laptop)
 
 ```powershell
-git clone <REPO-URL> BuskDesk
+git clone https://github.com/judged34d/BuskDesk.git
 cd BuskDesk
 .\scripts\run.ps1
 ```

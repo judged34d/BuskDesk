@@ -11,7 +11,7 @@ Dieses Repo ist die **einzige** Arbeitskopie ab jetzt. Am alten PC nicht weitere
 
 ```powershell
 cd $env:USERPROFILE\Projects
-git clone <REPO-URL> BuskDesk
+git clone https://github.com/judged34d/BuskDesk.git BuskDesk
 cd BuskDesk
 ```
 
